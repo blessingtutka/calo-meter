@@ -20,6 +20,8 @@ module.exports = {
                     active: '#c8871b',
                     disabled: '#fdd37d',
                 },
+                'dark-trans': 'rgba(18, 18, 18, 0.8)',
+                ph: '#757575',
                 primary: {
                     0: 'rgb(var(--color-primary-0)/<alpha-value>)',
                     50: 'rgb(var(--color-primary-50)/<alpha-value>)',
