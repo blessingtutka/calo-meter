@@ -13,9 +13,8 @@ export function PasswordInput({ ...props }: React.ComponentProps<typeof InputFie
             </InputSlot>
             <InputField
                 type={showPassword ? 'text' : 'password'}
-                placeholder='********'
-                placeholderTextColor='#6b7280'
-                className='pr-10 text-white'
+                placeholder='••••••••'
+                className='pr-10 text-white placeholder:text-ph'
                 {...props}
             />
             <InputSlot className='absolute right-2 top-1/2 -translate-y-1/2'>
