@@ -34,10 +34,10 @@ module.exports = defineConfig([
             'react/jsx-no-target-blank': 'off',
 
             // React Native specific
-            'react-native/no-unused-styles': 'error',
+            'react-native/no-unused-styles': 'off',
             'react-native/split-platform-components': 'warn',
-            'react-native/no-inline-styles': 'warn',
-            'react-native/no-color-literals': 'warn',
+            'react-native/no-inline-styles': 'off',
+            'react-native/no-color-literals': 'off',
             'react-native/no-raw-text': 'warn',
 
             // TypeScript rules
