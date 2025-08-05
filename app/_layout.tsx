@@ -48,7 +48,7 @@ export default function RootLayout() {
     return (
         <ThemeProvider value={colorScheme === 'dark' ? TransparentDarkTheme : CustomDefaultTheme}>
             <UserProvider>
-                <Stack>
+                <Stack initialRouteName='(pages)'>
                     <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
                     <Stack.Screen name='(pages)' options={{ headerShown: false }} />
                     <Stack.Screen name='+not-found' />
