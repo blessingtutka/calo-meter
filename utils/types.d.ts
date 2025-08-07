@@ -3,11 +3,6 @@ interface User {
     name?: string;
     email: string;
     avatar?: string;
-    phone?: string;
-    contacts?: User[];
-    token?: string;
-    emailVerified?: boolean;
-    twoFactorEnabled?: boolean;
 }
 
 interface AuthResponse {
