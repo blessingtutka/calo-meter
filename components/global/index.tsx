@@ -1,5 +1,4 @@
 // import { Brand } from './Brand';
-import { PasswordInput } from './PasswordInput';
+import { OtpInput } from './OtpInput';
 // import { UserAvatar } from './UserAvatar';
-import { Google } from './Google';
-export { Google, PasswordInput };
+export { OtpInput };
