@@ -1,6 +1,6 @@
-/* eslint-disable react-native/no-raw-text */
 import { ActivityIndicator } from '@/components/ui/activity-indicator';
 import { Button } from '@/components/ui/button';
+import { Divider } from '@/components/ui/divider';
 import {
     FormControl,
     FormControlError,
@@ -11,21 +11,32 @@ import {
 } from '@/components/ui/form-control';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, RefreshCcwDot, Send } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { AlertCircle, LogIn, Send, UserPlus } from 'lucide-react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { Text, View } from 'react-native';
-import { restPassowordRequestSchema, type resetPasswordRequestValue } from '../../utils/validators';
+import { authSchema, type AuthFormData } from '../../utils/validators';
 
-export function PasswordResetRequest({ onSubmit, isLoading }: { onSubmit: (data: resetPasswordRequestValue) => void; isLoading: boolean }) {
-    const form = useForm<resetPasswordRequestValue>({
-        resolver: zodResolver(restPassowordRequestSchema),
+export function AuthForm({
+    onSubmit,
+    isLoading,
+    onGoogleSignIn,
+}: {
+    onSubmit: (data: AuthFormData) => void;
+    isLoading: boolean;
+    onGoogleSignIn: () => void;
+}) {
+    const router = useRouter();
+
+    const form = useForm<AuthFormData>({
+        resolver: zodResolver(authSchema),
         defaultValues: {
             email: '',
         },
     });
 
     return (
-        <View className='space-y-4'>
+        <View className='gap-4'>
             {/* Email Field */}
             <Controller
                 control={form.control}
@@ -41,7 +52,6 @@ export function PasswordResetRequest({ onSubmit, isLoading }: { onSubmit: (data:
                             </InputSlot>
                             <InputField
                                 placeholder='email@example.com'
-                                placeholderTextColor='#757575 '
                                 value={field.value}
                                 onChangeText={field.onChange}
                                 onBlur={field.onBlur}
@@ -64,15 +74,28 @@ export function PasswordResetRequest({ onSubmit, isLoading }: { onSubmit: (data:
                 {isLoading ? (
                     <>
                         <ActivityIndicator className='text-white' />
-                        <Text className='text-white font-medium'>Requesting...</Text>
+                        <Text className='text-white font-medium'>Signing in...</Text>
                     </>
                 ) : (
                     <>
-                        <RefreshCcwDot size={18} className='text-white' />
-                        <Text className='text-white font-medium'>Request Password Reset</Text>
+                        <LogIn size={18} color={'white'} />
+                        <Text className='text-white font-medium'>Sign In / </Text>
+                        <UserPlus size={18} color={'white'} />
+                        <Text className='text-white font-medium'>Sign Up</Text>
                     </>
                 )}
             </Button>
+
+            <View className='relative'>
+                <View className='absolute inset-0 flex items-center'>
+                    <Divider className='w-full' />
+                </View>
+                <View className='relative w-full flex items-center'>
+                    <Text className='px-2 w-fit bg-black text-center text-sm text-gray-400'>OR CONTINUE WITH</Text>
+                </View>
+            </View>
+
+            {/* <Google onSuccess={onGoogleSignIn} disabled={isLoading} /> */}
         </View>
     );
 }
