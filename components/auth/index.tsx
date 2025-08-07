@@ -1,5 +1,4 @@
-import { LoginForm } from './Login';
-import { PasswordReset } from './PasswordReset';
-import { PasswordResetRequest } from './PasswordResetRequest';
-import { SignupForm } from './Signup';
-export { LoginForm, PasswordReset, PasswordResetRequest, SignupForm };
+import { AuthForm } from './AuthForm';
+import GoogleAuth from './GoogleAuth';
+import OtpForm from './OtpForm';
+export { AuthForm, GoogleAuth, OtpForm };
