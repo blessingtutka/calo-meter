@@ -38,7 +38,8 @@ module.exports = defineConfig([
             'react-native/split-platform-components': 'warn',
             'react-native/no-inline-styles': 'off',
             'react-native/no-color-literals': 'off',
-            'react-native/no-raw-text': 'warn',
+            'react-native/no-raw-text': 'off',
+            'react/no-unescaped-entities': 'off',
 
             // TypeScript rules
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
