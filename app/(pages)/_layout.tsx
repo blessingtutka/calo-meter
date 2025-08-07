@@ -8,13 +8,13 @@ export default function PagesLayout() {
 
     return (
         <ImageBackground source={require('@/assets/images/back.png')} style={styles.background} resizeMode='cover'>
-            <View style={styles.overlay} className='!p-0'>
+            <View style={styles.overlay}>
                 <Stack
                     screenOptions={{
                         headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
                     }}
                 >
-                    <Stack.Screen name='index' options={{ title: 'Home', headerShown: false }} />
+                    <Stack.Screen name='index' options={{ title: 'Welcome', headerShown: false }} />
 
                     <Stack.Screen
                         name='auth'
@@ -29,9 +29,9 @@ export default function PagesLayout() {
                     />
 
                     <Stack.Screen
-                        name='pswr'
+                        name='otp'
                         options={{
-                            title: 'Password Request Reset',
+                            title: 'One time Password',
                             headerLeft: () => (
                                 <Pressable onPress={() => router.replace('/auth')} className='px-2'>
                                     <ArrowLeft size={24} color='white' />
@@ -39,6 +39,8 @@ export default function PagesLayout() {
                             ),
                         }}
                     />
+                    <Stack.Screen name='xion' options={{ title: 'XION EX', headerShown: false }} />
+                    <Stack.Screen name='zktls' options={{ title: 'ZKTLS EX', headerShown: false }} />
                 </Stack>
             </View>
         </ImageBackground>
@@ -54,6 +56,6 @@ const styles = StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.4)',
-        paddingTop: 40,
+        paddingTop: 0,
     },
 });

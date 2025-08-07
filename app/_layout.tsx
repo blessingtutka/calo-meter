@@ -17,6 +17,7 @@ const TransparentDarkTheme = {
     colors: {
         ...DarkTheme.colors,
         background: 'transparent',
+        text: '#FFFFFF',
     },
 };
 
