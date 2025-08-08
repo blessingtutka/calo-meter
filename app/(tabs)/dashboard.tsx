@@ -1,48 +1,46 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
     return (
         <ParallaxScrollView
-            headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+            headerBackgroundColor={{ light: 'transparent', dark: 'transparent' }}
             headerImage={<Image source={require('@/assets/images/partial-react-logo.png')} style={styles.reactLogo} />}
         >
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type='title'>Welcome!</ThemedText>
+            <View style={styles.titleContainer}>
+                <Text className='text-2xl text-white'>Welcome!</Text>
                 <HelloWave />
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type='subtitle'>Step 1: Try it</ThemedText>
-                <ThemedText>
-                    Edit <ThemedText type='defaultSemiBold'>app/(tabs)/index.tsx</ThemedText> to see changes. Press{' '}
-                    <ThemedText type='defaultSemiBold'>
+            </View>
+            <View style={styles.stepContainer}>
+                <Text className='text-xl text-white'>Step 1: Try it</Text>
+                <Text className='text-white'>
+                    Edit <Text className='font-semibold text-white'>app/(tabs)/index.tsx</Text> to see changes. Press{' '}
+                    <Text className='font-semibold text-white'>
                         {Platform.select({
                             ios: 'cmd + d',
                             android: 'cmd + m',
                             web: 'F12',
                         })}
-                    </ThemedText>{' '}
+                    </Text>
                     to open developer tools.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type='subtitle'>Step 2: Explore</ThemedText>
-                <ThemedText>{`Tap the Explore tab to learn more about what's included in this starter app.`}</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type='subtitle'>Step 3: Get a fresh start</ThemedText>
-                <ThemedText>
+                </Text>
+            </View>
+            <View style={styles.stepContainer}>
+                <Text className='text-xl text-white'>Step 2: Explore</Text>
+                <Text className='text-white'>{`Tap the Explore tab to learn more about what's included in this starter app.`}</Text>
+            </View>
+            <View style={styles.stepContainer}>
+                <Text className='text-xl text-white'>Step 3: Get a fresh start</Text>
+                <Text className='text-white'>
                     {`When you're ready, run `}
-                    <ThemedText type='defaultSemiBold'>npm run reset-project</ThemedText> to get a fresh{' '}
-                    <ThemedText type='defaultSemiBold'>app</ThemedText> directory. This will move the current{' '}
-                    <ThemedText type='defaultSemiBold'>app</ThemedText> to <ThemedText type='defaultSemiBold'>app-example</ThemedText>.
-                </ThemedText>
-            </ThemedView>
+                    <Text className='font-semibold text-white'>npm run reset-project</Text> to get a fresh
+                    <Text className='font-semibold text-white'>app</Text> directory. This will move the current{' '}
+                    <Text className='font-semibold text-white'>app</Text> to <Text className='font-semibold text-white'>app-example</Text>.
+                </Text>
+            </View>
         </ParallaxScrollView>
     );
 }
