@@ -36,7 +36,7 @@
         "@tamagui/theme-builder": "^1.132.15",
         "axios": "^1.11.0",
         "babel-plugin-module-resolver": "^5.0.2",
-        "expo": "~53.0.20",
+        "expo": "^53.0.20",
         "expo-blur": "~14.1.5",
         "expo-constants": "~17.1.7",
         "expo-font": "~13.3.2",
@@ -63,6 +63,7 @@
         "react-native-safe-area-context": "5.4.0",
         "react-native-screens": "~4.11.1",
         "react-native-svg": "15.11.2",
+        "react-native-view-shot": "^4.0.3",
         "react-native-web": "^0.20.0",
         "react-native-webview": "13.13.5",
         "zod": "^4.0.14"
