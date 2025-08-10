@@ -1,293 +1,311 @@
-// import { useAbstraxionAccount, useAbstraxionSigningClient } from '@burnt-labs/abstraxion-react-native';
+import { useAbstraxionAccount, useAbstraxionSigningClient } from '@burnt-labs/abstraxion-react-native';
 // import { ReclaimVerification } from '@reclaimprotocol/inapp-rn-sdk';
-// import { useEffect, useState } from 'react';
-// import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useEffect, useState } from 'react';
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// const reclaimVerification = new ReclaimVerification();
+let ReclaimVerification: any = null;
 
-// const RUM_CONTRACT_ADDRESS = process.env.EXPO_PUBLIC_RUM_CONTRACT_ADDRESS ?? '';
+if (Platform.OS === 'ios' || Platform.OS === 'android') {
+    // Dynamically require only on native platforms
+    ReclaimVerification = require('@reclaimprotocol/inapp-rn-sdk').ReclaimVerification;
+}
 
-// const reclaimEnv = {
-//     appId: process.env.EXPO_PUBLIC_RECLAIM_APP_ID ?? '',
-//     appSecret: process.env.EXPO_PUBLIC_RECLAIM_APP_SECRET ?? '',
-//     providerId: process.env.EXPO_PUBLIC_RECLAIM_PROVIDER_ID ?? 'gmail',
-// };
+const RUM_CONTRACT_ADDRESS = process.env.EXPO_PUBLIC_RUM_CONTRACT_ADDRESS ?? '';
 
-// type Status = 'idle' | 'verifying' | 'verification_complete' | 'executing' | 'complete' | 'error';
+const reclaimEnv = {
+    appId: process.env.EXPO_PUBLIC_RECLAIM_APP_ID ?? '',
+    appSecret: process.env.EXPO_PUBLIC_RECLAIM_APP_SECRET ?? '',
+    providerId: process.env.EXPO_PUBLIC_RECLAIM_PROVIDER_ID ?? 'gmail',
+};
 
-// export default function GoogleAuth() {
-//     const { client } = useAbstraxionSigningClient();
-//     const { data: account, isConnected, login, isConnecting } = useAbstraxionAccount();
+type Status = 'idle' | 'verifying' | 'verification_complete' | 'executing' | 'complete' | 'error';
 
-//     const [queryResult, setQueryResult] = useState<number | undefined>(undefined);
-//     const [status, setStatus] = useState<Status>('idle');
-//     const [loading, setLoading] = useState(false);
+export default function GoogleAuth() {
+    const { client } = useAbstraxionSigningClient();
+    const { data: account, isConnected, login, isConnecting } = useAbstraxionAccount();
 
-//     const queryRUMContract = async () => {
-//         if (!client) return;
+    const [queryResult, setQueryResult] = useState<number | undefined>(undefined);
+    const [status, setStatus] = useState<Status>('idle');
+    const [loading, setLoading] = useState(false);
 
-//         try {
-//             const queryMsg = {
-//                 get_value_by_user: {
-//                     address: account?.bech32Address,
-//                 },
-//             };
+    const queryRUMContract = async () => {
+        if (!client) return;
 
-//             const result: string = await client.queryContractSmart(RUM_CONTRACT_ADDRESS, queryMsg);
-//             const parsed = parseInt(result.replace(/"/g, ''), 10);
-//             setQueryResult(isNaN(parsed) ? undefined : parsed);
-//         } catch (error) {
-//             console.log('Error querying RUM contract:', error);
-//         }
-//     };
+        try {
+            const queryMsg = {
+                get_value_by_user: {
+                    address: account?.bech32Address,
+                },
+            };
 
-//     useEffect(() => {
-//         if (client) {
-//             queryRUMContract();
-//         }
-//     }, [client]);
+            const result: string = await client.queryContractSmart(RUM_CONTRACT_ADDRESS, queryMsg);
+            const parsed = parseInt(result.replace(/"/g, ''), 10);
+            setQueryResult(isNaN(parsed) ? undefined : parsed);
+        } catch (error) {
+            console.log('Error querying RUM contract:', error);
+        }
+    };
 
-//     const startVerificationFlow = async () => {
-//         if (!account?.bech32Address) {
-//             Alert.alert('Error', 'Please connect your wallet first');
-//             return;
-//         }
+    useEffect(() => {
+        if (client) {
+            queryRUMContract();
+        }
+    }, [client]);
 
-//         if (!client) {
-//             Alert.alert('Error', 'Client not found');
-//             return;
-//         }
+    if (!ReclaimVerification) {
+        console.warn('ReclaimVerification not supported on web');
+        return (
+            <TouchableOpacity className='flex-row items-center justify-center gap-2 bg-white rounded-md p-2' disabled>
+                <FontAwesome name='google' size={20} color='#FDB327' />
+                <Text className='text-main font-bold'>Sign in with Google</Text>
+            </TouchableOpacity>
+        );
+    }
+    const reclaimVerification = new ReclaimVerification();
 
-//         if (status === 'error') {
-//             setQueryResult(undefined);
-//         }
+    const startVerificationFlow = async () => {
+        if (!account?.bech32Address) {
+            Alert.alert('Error', 'Please connect your wallet first');
+            return;
+        }
 
-//         setLoading(true);
-//         setStatus('verifying');
+        if (!client) {
+            Alert.alert('Error', 'Client not found');
+            return;
+        }
 
-//         try {
-//             // Step 1: Verify Gmail account with Reclaim
-//             const verificationResult = await reclaimVerification.startVerification({
-//                 appId: reclaimEnv.appId,
-//                 secret: reclaimEnv.appSecret,
-//                 providerId: reclaimEnv.providerId,
-//             });
+        if (status === 'error') {
+            setQueryResult(undefined);
+        }
 
-//             console.log('Verification result:', verificationResult);
-//             setStatus('verification_complete');
+        setLoading(true);
+        setStatus('verifying');
 
-//             // Step 2: Execute smart contract with proof
-//             setStatus('executing');
+        try {
+            // Step 1: Verify Gmail account with Reclaim
+            const verificationResult = await reclaimVerification.startVerification({
+                appId: reclaimEnv.appId,
+                secret: reclaimEnv.appSecret,
+                providerId: reclaimEnv.providerId,
+            });
 
-//             const claimInfo = {
-//                 provider: verificationResult.proofs[0].claimData.provider,
-//                 parameters: verificationResult.proofs[0].claimData.parameters,
-//                 context: verificationResult.proofs[0].claimData.context,
-//             };
+            console.log('Verification result:', verificationResult);
+            setStatus('verification_complete');
 
-//             const signedClaim = {
-//                 claim: {
-//                     identifier: verificationResult.proofs[0].claimData.identifier,
-//                     owner: verificationResult.proofs[0].claimData.owner,
-//                     epoch: verificationResult.proofs[0].claimData.epoch,
-//                     timestampS: verificationResult.proofs[0].claimData.timestampS,
-//                 },
-//                 signatures: verificationResult.proofs[0].signatures,
-//             };
+            // Step 2: Execute smart contract with proof
+            setStatus('executing');
 
-//             const executeMsg = {
-//                 update: {
-//                     value: {
-//                         proof: {
-//                             claimInfo,
-//                             signedClaim,
-//                         },
-//                     },
-//                 },
-//             };
+            const claimInfo = {
+                provider: verificationResult.proofs[0].claimData.provider,
+                parameters: verificationResult.proofs[0].claimData.parameters,
+                context: verificationResult.proofs[0].claimData.context,
+            };
 
-//             const executeResult = await client.execute(account?.bech32Address, RUM_CONTRACT_ADDRESS, executeMsg, 'auto');
+            const signedClaim = {
+                claim: {
+                    identifier: verificationResult.proofs[0].claimData.identifier,
+                    owner: verificationResult.proofs[0].claimData.owner,
+                    epoch: verificationResult.proofs[0].claimData.epoch,
+                    timestampS: verificationResult.proofs[0].claimData.timestampS,
+                },
+                signatures: verificationResult.proofs[0].signatures,
+            };
 
-//             console.log('Contract executed:', executeResult);
-//             setStatus('complete');
+            const executeMsg = {
+                update: {
+                    value: {
+                        proof: {
+                            claimInfo,
+                            signedClaim,
+                        },
+                    },
+                },
+            };
 
-//             await queryRUMContract();
-//             Alert.alert('Success', 'Verification completed and on-chain update successful!');
-//         } catch (error: any) {
-//             console.error('Verification error:', error);
-//             setStatus('error');
+            const executeResult = await client.execute(account?.bech32Address, RUM_CONTRACT_ADDRESS, executeMsg, 'auto');
 
-//             if (error instanceof ReclaimVerification.ReclaimVerificationException) {
-//                 switch (error.type) {
-//                     case ReclaimVerification.ExceptionType.Cancelled:
-//                         Alert.alert('Cancelled', 'Verification was cancelled by the user.');
-//                         break;
-//                     case ReclaimVerification.ExceptionType.Dismissed:
-//                         Alert.alert('Dismissed', 'Verification was dismissed.');
-//                         break;
-//                     case ReclaimVerification.ExceptionType.SessionExpired:
-//                         Alert.alert('Expired', 'Verification session expired.');
-//                         break;
-//                     case ReclaimVerification.ExceptionType.Failed:
-//                     default:
-//                         Alert.alert('Failed', 'Verification failed.');
-//                 }
-//             } else {
-//                 Alert.alert('Error', error instanceof Error ? error.message : 'Unknown error occurred');
-//             }
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
+            console.log('Contract executed:', executeResult);
+            setStatus('complete');
 
-//     const getStatusText = () => {
-//         switch (status) {
-//             case 'idle':
-//                 return 'Ready to start verification';
-//             case 'verifying':
-//                 return 'Verifying with Reclaim...';
-//             case 'verification_complete':
-//                 return '✓ Verification completed';
-//             case 'executing':
-//                 return 'Executing contract...';
-//             case 'complete':
-//                 return '✓ Verification flow complete';
-//             case 'error':
-//                 return '❌ Error occurred';
-//             default:
-//                 return 'Unknown';
-//         }
-//     };
+            await queryRUMContract();
+            Alert.alert('Success', 'Verification completed and on-chain update successful!');
+        } catch (error: any) {
+            console.error('Verification error:', error);
+            setStatus('error');
 
-//     const getStatusColor = () => {
-//         switch (status) {
-//             case 'idle':
-//                 return '#cccccc';
-//             case 'verifying':
-//             case 'executing':
-//                 return '#ffaa00';
-//             case 'verification_complete':
-//             case 'complete':
-//                 return '#4caf50';
-//             case 'error':
-//                 return '#ff4444';
-//             default:
-//                 return '#cccccc';
-//         }
-//     };
+            if (error instanceof ReclaimVerification.ReclaimVerificationException) {
+                switch (error.type) {
+                    case ReclaimVerification.ExceptionType.Cancelled:
+                        Alert.alert('Cancelled', 'Verification was cancelled by the user.');
+                        break;
+                    case ReclaimVerification.ExceptionType.Dismissed:
+                        Alert.alert('Dismissed', 'Verification was dismissed.');
+                        break;
+                    case ReclaimVerification.ExceptionType.SessionExpired:
+                        Alert.alert('Expired', 'Verification session expired.');
+                        break;
+                    case ReclaimVerification.ExceptionType.Failed:
+                    default:
+                        Alert.alert('Failed', 'Verification failed.');
+                }
+            } else {
+                Alert.alert('Error', error instanceof Error ? error.message : 'Unknown error occurred');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-//     const isButtonDisabled = () => loading || status === 'complete';
+    const getStatusText = () => {
+        switch (status) {
+            case 'idle':
+                return 'Ready to start verification';
+            case 'verifying':
+                return 'Verifying with Reclaim...';
+            case 'verification_complete':
+                return '✓ Verification completed';
+            case 'executing':
+                return 'Executing contract...';
+            case 'complete':
+                return '✓ Verification flow complete';
+            case 'error':
+                return '❌ Error occurred';
+            default:
+                return 'Unknown';
+        }
+    };
 
-//     const getButtonText = () => {
-//         if (loading) return 'Processing...';
-//         if (status === 'complete') return 'Verification Complete';
-//         if (status === 'error') return 'Retry Verification';
-//         return 'Google Auth';
-//     };
+    const getStatusColor = () => {
+        switch (status) {
+            case 'idle':
+                return '#cccccc';
+            case 'verifying':
+            case 'executing':
+                return '#ffaa00';
+            case 'verification_complete':
+            case 'complete':
+                return '#4caf50';
+            case 'error':
+                return '#ff4444';
+            default:
+                return '#cccccc';
+        }
+    };
 
-//     return (
-//         <View style={styles.container}>
-//             {!isConnected ? (
-//                 <View style={styles.connectButtonContainer}>
-//                     <TouchableOpacity
-//                         onPress={login}
-//                         style={[styles.menuButton, styles.fullWidthButton, isConnecting && styles.disabledButton]}
-//                         disabled={isConnecting}
-//                     >
-//                         <Text style={styles.buttonText}>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</Text>
-//                     </TouchableOpacity>
-//                 </View>
-//             ) : (
-//                 <>
-//                     <TouchableOpacity
-//                         style={[styles.button, isButtonDisabled() && styles.disabledButton]}
-//                         onPress={startVerificationFlow}
-//                         disabled={isButtonDisabled()}
-//                     >
-//                         <Text style={styles.buttonText}>{getButtonText()}</Text>
-//                     </TouchableOpacity>
+    const isButtonDisabled = () => loading || status === 'complete';
 
-//                     <View style={styles.statusContainer}>
-//                         <Text style={styles.statusTitle}>Status:</Text>
-//                         <Text style={[styles.statusText, { color: getStatusColor() }]}>{getStatusText()}</Text>
-//                     </View>
-//                 </>
-//             )}
-//         </View>
-//     );
-// }
+    const getButtonText = () => {
+        if (loading) return 'Processing...';
+        if (status === 'complete') return 'Verification Complete';
+        if (status === 'error') return 'Retry Verification';
+        return 'Signin with Google';
+    };
 
-// const styles = StyleSheet.create({
-//     container: {
-//         gap: 15,
-//     },
-//     connectButtonContainer: {
-//         width: '100%',
-//         paddingHorizontal: 20,
-//         alignItems: 'center',
-//     },
-//     fullWidthButton: {
-//         width: '100%',
-//         maxWidth: '100%',
-//     },
-//     menuButton: {
-//         padding: 15,
-//         borderRadius: 5,
-//         backgroundColor: '#ffffff',
-//         alignItems: 'center',
-//         flex: 1,
-//         minWidth: 120,
-//         maxWidth: '48%',
-//     },
-//     buttonText: {
-//         color: '#000000',
-//         fontSize: 16,
-//         fontWeight: '500',
-//     },
-//     disabledButton: {
-//         backgroundColor: '#333333',
-//         opacity: 0.6,
-//     },
-//     button: {
-//         backgroundColor: '#ffffff',
-//         padding: 15,
-//         borderRadius: 8,
-//         alignItems: 'center',
-//     },
-//     statusContainer: {
-//         backgroundColor: '#111111',
-//         padding: 15,
-//         borderRadius: 8,
-//         borderWidth: 1,
-//         borderColor: '#333333',
-//     },
-//     statusTitle: {
-//         fontSize: 16,
-//         fontWeight: 'bold',
-//         color: '#ffffff',
-//         marginBottom: 5,
-//     },
-//     statusText: {
-//         fontSize: 14,
-//         fontWeight: '500',
-//     },
-//     infoContainer: {
-//         backgroundColor: '#111111',
-//         padding: 15,
-//         borderRadius: 8,
-//         borderWidth: 1,
-//         borderColor: '#333333',
-//     },
-//     infoTitle: {
-//         fontSize: 16,
-//         fontWeight: 'bold',
-//         color: '#ffffff',
-//         marginBottom: 5,
-//     },
-//     infoText: {
-//         fontSize: 14,
-//         color: '#cccccc',
-//     },
-// });
+    return (
+        <View style={styles.container}>
+            {!isConnected ? (
+                <View style={styles.connectButtonContainer}>
+                    <TouchableOpacity
+                        onPress={login}
+                        style={[styles.menuButton, styles.fullWidthButton, isConnecting && styles.disabledButton]}
+                        disabled={isConnecting}
+                    >
+                        <Text style={styles.buttonText}>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <>
+                    <TouchableOpacity
+                        style={[styles.button, isButtonDisabled() && styles.disabledButton]}
+                        onPress={startVerificationFlow}
+                        disabled={isButtonDisabled()}
+                    >
+                        <FontAwesome name='google' size={20} color='#FDB327' />
+                        <Text style={styles.buttonText}>{getButtonText()}</Text>
+                    </TouchableOpacity>
 
-export default function GoogleAuth() {}
+                    <View style={styles.statusContainer}>
+                        <Text style={styles.statusTitle}>Status:</Text>
+                        <Text style={[styles.statusText, { color: getStatusColor() }]}>{getStatusText()}</Text>
+                    </View>
+                </>
+            )}
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        gap: 15,
+    },
+    connectButtonContainer: {
+        width: '100%',
+        paddingHorizontal: 20,
+        alignItems: 'center',
+    },
+    fullWidthButton: {
+        width: '100%',
+        maxWidth: '100%',
+    },
+    menuButton: {
+        padding: 15,
+        borderRadius: 5,
+        backgroundColor: '#ffffff',
+        alignItems: 'center',
+        flex: 1,
+        minWidth: 120,
+        maxWidth: '48%',
+    },
+    buttonText: {
+        color: '#000000',
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    disabledButton: {
+        backgroundColor: '#333333',
+        opacity: 0.6,
+    },
+    button: {
+        backgroundColor: '#ffffff',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    statusContainer: {
+        backgroundColor: '#111111',
+        padding: 15,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#333333',
+    },
+    statusTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#ffffff',
+        marginBottom: 5,
+    },
+    statusText: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    infoContainer: {
+        backgroundColor: '#111111',
+        padding: 15,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#333333',
+    },
+    infoTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#ffffff',
+        marginBottom: 5,
+    },
+    infoText: {
+        fontSize: 14,
+        color: '#cccccc',
+    },
+});
+
+// export default function GoogleAuth() {}
