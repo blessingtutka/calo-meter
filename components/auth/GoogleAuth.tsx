@@ -57,8 +57,8 @@ export default function GoogleAuth() {
         console.warn('ReclaimVerification not supported on web');
         return (
             <TouchableOpacity className='flex-row items-center justify-center gap-2 bg-white rounded-md p-2' disabled>
-                <FontAwesome name='google' size={20} color='#FDB327' />
-                <Text className='text-main font-bold'>Sign in with Google</Text>
+                <FontAwesome name='google' size={20} color='#687280' />
+                <Text className='text-gray-500 font-bold'>Sign in with Google</Text>
             </TouchableOpacity>
         );
     }
@@ -211,7 +211,7 @@ export default function GoogleAuth() {
                         style={[styles.menuButton, styles.fullWidthButton, isConnecting && styles.disabledButton]}
                         disabled={isConnecting}
                     >
-                        <Text style={styles.buttonText}>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</Text>
+                        <Text style={styles.buttonText}>{isConnecting ? 'Connecting...' : 'Connect'}</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
