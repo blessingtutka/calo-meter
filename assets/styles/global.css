@@ -12,11 +12,33 @@
         @apply rounded-md;
     } */
 
+    .main-input {
+        @apply border border-gray-700 bg-[#121212] rounded-md hover:border-white;
+    }
+
     .main-btn {
         @apply !bg-main 
         hover:!bg-main-hover 
         active:!bg-main-active 
         disabled:!bg-main-disabled
+        rounded-md py-2 px-4 text-white font-semibold;
+    }
+
+    .main-rbtn {
+        @apply !text-main bg-white
+        hover:!text-main-hover 
+        active:!text-main-active 
+        disabled:!text-main-disabled
          rounded-md py-2 px-4;
+    }
+    .scrolled-view {
+        @apply items-center justify-center;
+    }
+
+    .scrolled-view > div {
+        @apply flex-1 w-full items-center justify-center p-4;
+    }
+    .content-view {
+        @apply flex-1 w-full items-center justify-center;
     }
 }
