@@ -1,3 +1,4 @@
+import { ScreenLayout } from '@/components/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useRouter } from 'expo-router';
@@ -8,7 +9,7 @@ export default function Home() {
     const navigation = useRouter();
 
     return (
-        <View className='flex-1 justify-center items-center px-4 !bg-transparent'>
+        <ScreenLayout>
             <Card className='w-fit bg-dark-trans rounded-lg shadow-sm p-6 space-y-4'>
                 <Image source={require('@/assets/images/logo.png')} className='!w-32 !h-32 self-center' />
 
@@ -33,6 +34,6 @@ export default function Home() {
                     </Pressable>
                 </View>
             </Card>
-        </View>
+        </ScreenLayout>
     );
 }

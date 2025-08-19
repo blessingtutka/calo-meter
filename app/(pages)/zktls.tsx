@@ -2,7 +2,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-export default function HomeScreen() {
+export default function ZKtls() {
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
             <Text style={styles.title}>ZKtls / Reclaim</Text>

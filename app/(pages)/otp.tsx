@@ -1,14 +1,14 @@
 import OtpForm from '@/components/auth/OtpForm';
+import { ScreenLayout } from '@/components/ScreenLayout';
 import { Card } from '@/components/ui/card';
 import React from 'react';
-import { View } from 'react-native';
 
-export default function Auth() {
+export default function Otp() {
     return (
-        <View className='flex-1 items-center justify-center p-4'>
+        <ScreenLayout>
             <Card className='w-full max-w-md bg-[#121212] rounded-lg shadow-sm'>
                 <OtpForm />
             </Card>
-        </View>
+        </ScreenLayout>
     );
 }

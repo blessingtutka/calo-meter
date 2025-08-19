@@ -33,7 +33,7 @@ const retryOperation = async <T,>(operation: () => Promise<T>, maxRetries = 3, d
     throw lastError;
 };
 
-export default function Dev() {
+export default function Xion() {
     // Abstraxion hooks
     const { data: account, logout, login, isConnected, isConnecting } = useAbstraxionAccount();
     const { client, signArb } = useAbstraxionSigningClient();

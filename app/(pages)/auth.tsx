@@ -1,3 +1,4 @@
+import { ScreenLayout } from '@/components/ScreenLayout';
 import { ActivityIndicator } from '@/components/ui/activity-indicator';
 import { Card } from '@/components/ui/card';
 import { useRouter } from 'expo-router';
@@ -39,7 +40,7 @@ export default function Auth() {
     };
 
     return (
-        <View className='flex-1 items-center justify-center p-4'>
+        <ScreenLayout>
             <Card className='w-full max-w-md bg-[#121212] rounded-lg shadow-sm'>
                 <View className='flex-col justify-center'>
                     <Text className={`font-medium text-blue-400 text-3xl`}>Welcome!</Text>
@@ -58,6 +59,6 @@ export default function Auth() {
                     )}
                 </View>
             </Card>
-        </View>
+        </ScreenLayout>
     );
 }
