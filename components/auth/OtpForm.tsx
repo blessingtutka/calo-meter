@@ -18,6 +18,7 @@ const OtpForm = () => {
         try {
             console.log('Submitting OTP:', otp);
             // await verifyOTP(otp);
+            route.push('/dashboard');
         } catch (error) {
             setErrorMessage('Invalid verification code. Please try again.');
         } finally {
