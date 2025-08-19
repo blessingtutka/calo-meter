@@ -3,7 +3,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Tabs, useRouter } from 'expo-router';
-import { ArrowLeft, CalendarDays, CircleUserRound, House } from 'lucide-react-native';
+import { ArrowLeft, CalendarDays, CircleUserRound, House, Soup } from 'lucide-react-native';
 import React from 'react';
 import { Platform, Pressable } from 'react-native';
 
@@ -32,6 +32,14 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen
+                name='meal'
+                options={{
+                    title: 'Meal',
+                    tabBarIcon: ({ color }) => <Soup size={28} color={color} />,
+                }}
+            />
+
+            <Tabs.Screen
                 name='calendar'
                 options={{
                     title: 'calendar',
@@ -56,6 +64,21 @@ export default function TabLayout() {
                     tabBarStyle: { display: 'flex' },
                     headerLeft: () => (
                         <Pressable onPress={() => router.replace('/profile')} className='px-2'>
+                            <ArrowLeft size={24} color='white' />
+                        </Pressable>
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name='add_meal'
+                options={{
+                    title: 'Add Meal',
+                    href: null,
+                    headerShown: true,
+
+                    tabBarStyle: { display: 'flex' },
+                    headerLeft: () => (
+                        <Pressable onPress={() => router.replace('/meal')} className='px-2'>
                             <ArrowLeft size={24} color='white' />
                         </Pressable>
                     ),
