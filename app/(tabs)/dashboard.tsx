@@ -1,6 +1,7 @@
 import { ScreenLayout } from '@/components/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useRouter } from 'expo-router';
 import { Camera, ChevronRight, Plus } from 'lucide-react-native';
 import React from 'react';
 import { FlatList, Image, Text, View } from 'react-native';
@@ -17,6 +18,8 @@ export default function Dashboard() {
     const consumed = meals.reduce((sum, m) => sum + m.calories, 0);
     const remaining = Math.max(0, dailyGoal - consumed);
     const progressPercent = Math.min(100, (consumed / dailyGoal) * 100);
+
+    const router = useRouter();
 
     const getProgressColor = () => {
         if (progressPercent < 50) return '#4ade80'; // green
@@ -91,7 +94,10 @@ export default function Dashboard() {
                             <Camera size={20} color='white' />
                             <Text className='ml-2 text-white font-medium'>Snap / Scan Meal</Text>
                         </Button>
-                        <Button className='flex-1 blue-rbtn rounded-xl p-3 flex-row items-center justify-center'>
+                        <Button
+                            onPress={() => router.push('/add_meal')}
+                            className='flex-1 blue-rbtn rounded-xl p-3 flex-row items-center justify-center'
+                        >
                             <Plus size={20} color='white' />
                             <Text className='ml-2 text-white font-medium'>Add Manually</Text>
                         </Button>
