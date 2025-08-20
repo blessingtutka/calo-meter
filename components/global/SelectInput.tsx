@@ -1,16 +1,6 @@
-import { ChevronDownIcon } from '@/components/ui/icon';
-import {
-    Select,
-    SelectBackdrop,
-    SelectContent,
-    SelectDragIndicator,
-    SelectDragIndicatorWrapper,
-    SelectIcon,
-    SelectInput,
-    SelectItem,
-    SelectPortal,
-    SelectTrigger,
-} from '@/components/ui/select';
+import { Picker } from '@react-native-picker/picker';
+import React from 'react';
+import { View } from 'react-native';
 
 type CSelectInputProps = {
     placeholder?: string;
@@ -22,22 +12,20 @@ type CSelectInputProps = {
 
 export function CSelectInput({ placeholder, value, onChange, options, className }: CSelectInputProps) {
     return (
-        <Select selectedValue={value} onValueChange={onChange}>
-            <SelectTrigger variant='outline' size='md' className={className}>
-                <SelectInput placeholder={placeholder} />
-                <SelectIcon className='mr-3' as={ChevronDownIcon} />
-            </SelectTrigger>
-            <SelectPortal>
-                <SelectBackdrop />
-                <SelectContent>
-                    <SelectDragIndicatorWrapper>
-                        <SelectDragIndicator />
-                    </SelectDragIndicatorWrapper>
-                    {options.map((opt) => (
-                        <SelectItem key={opt.value} label={opt.label} value={opt.value} isDisabled={opt.disabled} />
-                    ))}
-                </SelectContent>
-            </SelectPortal>
-        </Select>
+        <View className={` ${className || ''}`}>
+            <Picker
+                selectedValue={value}
+                dropdownIconColor='#fff'
+                onValueChange={(val) => {
+                    if (onChange) onChange(val);
+                }}
+                className='main-input'
+            >
+                {placeholder && <Picker.Item label={placeholder} value='' enabled={false} color='#888' />}
+                {options.map((opt) => (
+                    <Picker.Item key={opt.value} label={opt.label} value={opt.value} enabled={!opt.disabled} />
+                ))}
+            </Picker>
+        </View>
     );
 }
