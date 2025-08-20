@@ -13,7 +13,8 @@
     } */
 
     .main-input {
-        @apply border border-gray-700 bg-[#121212] rounded-md hover:border-white;
+        @apply flex-1 py-2 px-3 text-white border border-gray-700 bg-[#121212] rounded-md hover:border-white
+        focus:border-2 focus:border-white;
     }
 
     .main-btn {
