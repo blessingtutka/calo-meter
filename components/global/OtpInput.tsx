@@ -29,9 +29,9 @@ const OtpInput = ({ onCodeFilled }: { onCodeFilled: (code: string) => void }) =>
     };
 
     return (
-        <View className='flex-row gap-2'>
+        <View className='relative w-full flex-row gap-2 justify-center items-center'>
             {Array.from({ length: 6 }).map((_, index) => (
-                <View key={index} className='w-16 h-16 border border-gray-700 bg-[#121212] rounded-md justify-center items-center'>
+                <View key={index} className='w-[16%] h-16 border border-gray-700 bg-[#121212] rounded-md justify-center items-center'>
                     <TextInput
                         ref={(ref) => (inputs.current[index] = ref as any)}
                         className='w-full h-full text-center text-2xl font-bold text-gray-200 '
@@ -41,7 +41,7 @@ const OtpInput = ({ onCodeFilled }: { onCodeFilled: (code: string) => void }) =>
                         onChangeText={(text) => handleChange(text, index)}
                         onKeyPress={(e) => handleKeyPress(e, index)}
                         focusable={true}
-                        selectionColor='#3b82f6' // blue-500
+                        selectionColor='#3b82f6'
                     />
                 </View>
             ))}
