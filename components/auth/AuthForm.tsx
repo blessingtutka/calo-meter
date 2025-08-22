@@ -11,24 +11,13 @@ import {
 } from '@/components/ui/form-control';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'expo-router';
 import { AlertCircle, LogIn, Send, UserPlus } from 'lucide-react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import { authSchema, type AuthFormData } from '../../utils/validators';
-import GoogleAuth from './GoogleAuth';
+// import GoogleAuth from './GoogleAuth';
 
-export function AuthForm({
-    onSubmit,
-    isLoading,
-    onGoogleSignIn,
-}: {
-    onSubmit: (data: AuthFormData) => void;
-    isLoading: boolean;
-    onGoogleSignIn: () => void;
-}) {
-    const router = useRouter();
-
+export function AuthForm({ onSubmit, isLoading }: { onSubmit: (data: AuthFormData) => void; isLoading: boolean }) {
     const form = useForm<AuthFormData>({
         resolver: zodResolver(authSchema),
         defaultValues: {
@@ -47,7 +36,7 @@ export function AuthForm({
                         <FormControlLabel>
                             <FormControlLabelText className='text-sm font-medium text-gray-200'>Email</FormControlLabelText>
                         </FormControlLabel>
-                        <Input className='border border-gray-700 bg-[#121212] rounded-md'>
+                        <Input className='border border-gray-700 bg-[#121212] focus:border-white focus:border-2 rounded-md'>
                             <InputSlot className='pl-3'>
                                 <InputIcon as={Send} className='text-gray-400' />
                             </InputSlot>
@@ -58,7 +47,7 @@ export function AuthForm({
                                 onBlur={field.onBlur}
                                 autoCapitalize='none'
                                 keyboardType='email-address'
-                                className='flex-1 py-2 px-3 text-white placeholder:text-ph'
+                                className='flex-1 py-2 px-3 !text-white placeholder:!text-ph'
                             />
                         </Input>
                         {fieldState.error && (
@@ -95,7 +84,7 @@ export function AuthForm({
                     <Text className='px-2 w-fit bg-black text-center text-sm text-gray-400'>OR CONTINUE WITH</Text>
                 </View>
             </View>
-            <GoogleAuth />
+            {/* <GoogleAuth /> */}
         </View>
     );
 }
