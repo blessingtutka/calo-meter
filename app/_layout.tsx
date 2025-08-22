@@ -50,8 +50,8 @@ export default function RootLayout() {
         <ThemeProvider value={colorScheme === 'dark' ? TransparentDarkTheme : CustomDefaultTheme}>
             <UserProvider>
                 <Stack initialRouteName='(pages)'>
-                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
                     <Stack.Screen name='(pages)' options={{ headerShown: false }} />
+                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
                     <Stack.Screen name='+not-found' />
                 </Stack>
                 <StatusBar style='auto' />

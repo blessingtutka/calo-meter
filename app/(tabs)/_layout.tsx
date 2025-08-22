@@ -5,7 +5,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Tabs, useRouter } from 'expo-router';
 import { ArrowLeft, CalendarDays, CircleUserRound, House, Soup } from 'lucide-react-native';
 import React from 'react';
-import { Platform, Pressable } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -67,6 +67,7 @@ export default function TabLayout() {
                             <ArrowLeft size={24} color='white' />
                         </Pressable>
                     ),
+                    headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
                 }}
             />
             <Tabs.Screen
@@ -82,6 +83,7 @@ export default function TabLayout() {
                             <ArrowLeft size={24} color='white' />
                         </Pressable>
                     ),
+                    headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
                 }}
             />
         </Tabs>
