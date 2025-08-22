@@ -1,5 +1,6 @@
+/* eslint-disable react/no-unescaped-entities */
 import { OtpInput } from '@/components/global';
-import { HStack, Spinner } from '@gluestack-ui/themed';
+import { Spinner } from '@gluestack-ui/themed';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
@@ -46,7 +47,7 @@ const OtpForm = () => {
     };
 
     return (
-        <View className='flex-col items-center justify-center flex-1 px-4 gap-2'>
+        <View className='flex-col items-center justify-center flex-1 px-4 gap-2 box-border'>
             <Text className='text-2xl mb-4 text-center text-white'>Enter 6-digit verification code</Text>
 
             <Text className='text-sm text-gray-500 mb-4 text-center'>Please check your email for the verification code</Text>
@@ -63,10 +64,10 @@ const OtpForm = () => {
                 ) : (
                     <Button variant='link' className='text-main p-0' disabled={isResending} onPress={handleResendCode}>
                         {isResending ? (
-                            <HStack className='space-x-1 items-center'>
+                            <View className='flex-row gap-1 items-center'>
                                 <Spinner size='small' />
                                 <ButtonText className='text-sm'>Resending</ButtonText>
-                            </HStack>
+                            </View>
                         ) : (
                             <ButtonText className='text-primary-500 text-sm'>Resend now</ButtonText>
                         )}
