@@ -26,13 +26,13 @@ export default function Auth() {
 
     return (
         <ScreenLayout>
-            <Card className='w-full max-w-2xl bg-[#121212] rounded-2xl shadow-lg overflow-hidden'>
+            <Card className='w-full p-8 max-w-2xl bg-[#121212] rounded-2xl shadow-lg overflow-hidden'>
                 <View className='flex-col justify-center'>
                     <Text className={`font-medium text-blue-400 text-3xl`}>Tell us more!</Text>
                     <Text className={`font-medium text-gray-500 text-base`}>Tell us more to track your health better</Text>
                 </View>
 
-                <View className='p-6'>
+                <View>
                     {error && <Text className='text-red-400 mb-4 text-sm'>{error}</Text>}
 
                     {isLoading ? (

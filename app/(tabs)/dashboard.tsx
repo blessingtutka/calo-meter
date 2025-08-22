@@ -119,6 +119,7 @@ export default function Dashboard() {
                             data={meals}
                             keyExtractor={(item) => item.id}
                             contentContainerStyle={{ paddingHorizontal: 24 }}
+                            scrollEnabled={false}
                             renderItem={({ item }) => (
                                 <View className='bg-[#1e1e1e] rounded-xl shadow-sm mb-3 p-4 border border-gray-800 flex-row items-center'>
                                     <Image

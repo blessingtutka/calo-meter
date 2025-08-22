@@ -36,11 +36,11 @@ export default function Profile() {
 
                 <TouchableOpacity className='flex-row justify-between items-center p-4'>
                     <View className='flex-row gap-2 items-center'>
-                        <LogOut size={20} className='text-red-500' />
+                        <LogOut size={20} color={'#ef4444'} />
                         <Text className='text-red-500 text-base font-semibold'>Logout</Text>
                     </View>
 
-                    <ChevronRight size={20} className='text-red-500' />
+                    <ChevronRight size={20} color={'#ef4444'} />
                 </TouchableOpacity>
             </Card>
         </ScreenLayout>

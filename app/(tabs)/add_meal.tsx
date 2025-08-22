@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Picker } from '@react-native-picker/picker';
 import { Plus, Search } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // Mock fetch function (replace with real API call)
 async function fetchFoods(query: string) {
@@ -60,6 +60,7 @@ export default function FoodSearchScreen() {
                     data={foods}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={{ padding: 16 }}
+                    scrollEnabled={false}
                     renderItem={({ item }) => (
                         <View className='bg-[#1e1e1e] rounded-xl p-4 mb-3 border border-gray-800'>
                             <View className='flex-row items-center mb-2'>
@@ -67,17 +68,22 @@ export default function FoodSearchScreen() {
                                     <Text className='text-white font-semibold text-base'>{item.name}</Text>
                                     <Text className='text-gray-400 text-sm'>{item.caloriesPer100g} kcal / 100g</Text>
                                 </View>
-                                <Picker
-                                    selectedValue={mealTypes[item.id] || 'Breakfast'}
-                                    onValueChange={(value) => setMealTypes({ ...mealTypes, [item.id]: value })}
-                                    style={{ color: 'white', backgroundColor: '#2a2a2a', borderRadius: 12 }}
-                                    className='me-2 p-1 text-sm'
-                                >
-                                    <Picker.Item label='breakfast' value='Breakfast' />
-                                    <Picker.Item label='lunch' value='Lunch' />
-                                    <Picker.Item label='dinner' value='Dinner' />
-                                    <Picker.Item label='snacks' value='Snacks' />
-                                </Picker>
+                                {Platform.OS === 'web' ? (
+                                    <Picker
+                                        selectedValue={mealTypes[item.id] || 'Breakfast'}
+                                        onValueChange={(value) => setMealTypes({ ...mealTypes, [item.id]: value })}
+                                        style={{ color: 'white', backgroundColor: '#2a2a2a', borderRadius: 12 }}
+                                        className='me-2 p-1 text-sm'
+                                    >
+                                        <Picker.Item label='breakfast' value='Breakfast' />
+                                        <Picker.Item label='lunch' value='Lunch' />
+                                        <Picker.Item label='dinner' value='Dinner' />
+                                        <Picker.Item label='snacks' value='Snacks' />
+                                    </Picker>
+                                ) : (
+                                    ''
+                                )}
+
                                 <TextInput
                                     value={grams[item.id] || ''}
                                     onChangeText={(text) => setGrams({ ...grams, [item.id]: text })}
@@ -90,6 +96,24 @@ export default function FoodSearchScreen() {
                                     <Plus size={20} color='white' />
                                 </TouchableOpacity>
                             </View>
+                            {Platform.OS !== 'web' ? (
+                                <View style={styles.container}>
+                                    <Picker
+                                        selectedValue={mealTypes[item.id] || 'Breakfast'}
+                                        onValueChange={(value) => setMealTypes({ ...mealTypes, [item.id]: value })}
+                                        mode='dropdown'
+                                        style={styles.picker}
+                                    >
+                                        <Picker.Item style={{ fontSize: 13 }} label='Meal Type' value='' enabled={false} />
+                                        <Picker.Item style={{ fontSize: 13 }} label='breakfast' value='Breakfast' />
+                                        <Picker.Item style={{ fontSize: 13 }} label='lunch' value='Lunch' />
+                                        <Picker.Item style={{ fontSize: 13 }} label='dinner' value='Dinner' />
+                                        <Picker.Item style={{ fontSize: 13 }} label='snacks' value='Snacks' />
+                                    </Picker>
+                                </View>
+                            ) : (
+                                ''
+                            )}
                         </View>
                     )}
                 />
@@ -97,3 +121,19 @@ export default function FoodSearchScreen() {
         </ScreenLayout>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        borderRadius: 12,
+        backgroundColor: '#2a2a2a',
+        overflow: 'hidden',
+    },
+    picker: {
+        color: '#fff',
+        paddingVertical: 4,
+        width: '100%',
+        paddingHorizontal: 4,
+        fontSize: 12,
+        height: 50,
+    },
+});
