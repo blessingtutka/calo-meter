@@ -9,7 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import { stepFields } from '../../utils/fields';
 import { healthSchemas, type HealthFormData } from '../../utils/validators';
-import { CSelectInput } from '../global/SelectInput';
+import { CheckBox, CSelectInput, DateInput, MultiSelectInput } from '../global';
 
 interface HealthStepFormProps {
     onSave: (step: number, data: Partial<HealthFormData>) => Promise<void>;
@@ -31,6 +31,16 @@ export function HealthStepForm({ onSave }: HealthStepFormProps) {
         if (step < stepFields.length) setStep((prev) => prev + 1);
     };
 
+    const handleNext = async () => {
+        const isValid = await form.trigger();
+        if (!isValid) return;
+
+        if (step < stepFields.length) {
+            setStep((prev) => prev + 1);
+            form.reset(); // Reset form for next step
+        }
+    };
+
     return (
         <View className='gap-4'>
             <Text className='text-lg font-bold text-white'>{stepFields[step - 1].title}</Text>
@@ -49,11 +59,30 @@ export function HealthStepForm({ onSave }: HealthStepFormProps) {
                                 <CSelectInput
                                     placeholder={field.placeholder}
                                     value={String(f.value ?? '')}
+                                    onChange={(val) => {
+                                        f.onChange(val || '');
+                                    }}
                                     options={field.items ?? []}
-                                    className='flex-1 py-2 px-3 text-white'
+                                    className='flex-1 text-white'
                                 />
+                            ) : field.type === 'multi-select' ? (
+                                <MultiSelectInput
+                                    placeholder={field.placeholder}
+                                    value={Array.isArray(f.value) ? f.value : []}
+                                    onChange={(val) => f.onChange(val)}
+                                    options={field.items ?? []}
+                                />
+                            ) : field.type === 'date' ? (
+                                <DateInput
+                                    placeholder={field.placeholder}
+                                    value={f.value ? new Date(f.value as string) : undefined}
+                                    onChange={(val) => f.onChange(val.toISOString())}
+                                    className='flex-1'
+                                />
+                            ) : field.type === 'checkbox' ? (
+                                <CheckBox placeholder={field.placeholder} value={!!f.value} onChange={(val) => f.onChange(val)} className='flex-1' />
                             ) : (
-                                <Input className='main-input'>
+                                <Input className='text-white border-none outline-none'>
                                     <InputField
                                         placeholder={field.placeholder}
                                         value={String(f.value ?? '')}
@@ -61,7 +90,7 @@ export function HealthStepForm({ onSave }: HealthStepFormProps) {
                                             f.onChange(field.type === 'number' ? Number(val) : val);
                                         }}
                                         keyboardType={field.type === 'number' ? 'numeric' : 'default'}
-                                        className='flex-1 py-2 px-3 text-white'
+                                        className='main-input'
                                     />
                                 </Input>
                             )}
@@ -78,12 +107,26 @@ export function HealthStepForm({ onSave }: HealthStepFormProps) {
             <View className='flex-row justify-between'>
                 {step > 1 && (
                     <Button onPress={() => setStep((prev) => prev - 1)} className='main-rbtn'>
-                        Back
+                        <Text className='text-main'>Back</Text>
                     </Button>
                 )}
-                <Button onPress={form.handleSubmit(onSubmit)} disabled={loading} className='main-btn'>
+                {/* <Button onPress={form.handleSubmit(onSubmit)} disabled={loading} className='main-btn'>
                     {loading ? <ActivityIndicator /> : step === stepFields.length ? 'Finish' : 'Next'}
-                </Button>
+                </Button> */}
+                <View className='flex-row gap-2'>
+                    <Button onPress={form.handleSubmit(onSubmit)} disabled={loading} className='main-rbtn'>
+                        {loading ? <ActivityIndicator /> : <Text className='text-main'>Save</Text>}
+                    </Button>
+                    <Button onPress={handleNext} disabled={loading} className='main-btn'>
+                        {loading ? (
+                            <ActivityIndicator />
+                        ) : step === stepFields.length ? (
+                            <Text className='text-white'>Finish</Text>
+                        ) : (
+                            <Text className='text-white'>Next</Text>
+                        )}
+                    </Button>
+                </View>
             </View>
         </View>
     );
