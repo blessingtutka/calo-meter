@@ -28,7 +28,7 @@ export const stepFields: { step: number; title: string; fields: FieldConfig[] }[
             {
                 name: 'birthDate',
                 label: 'Birth Date',
-                placeholder: 'YYYY-MM-DD',
+                placeholder: 'MM-DD-YYYY',
                 type: 'date',
             },
             { name: 'height', label: 'Height', placeholder: 'e.g. 170', type: 'number' },
@@ -79,8 +79,8 @@ export const stepFields: { step: number; title: string; fields: FieldConfig[] }[
         step: 3,
         title: 'Medical Considerations',
         fields: [
-            { name: 'hasDiabetes', label: 'Diabetes', type: 'checkbox' },
-            { name: 'hasHypertension', label: 'Hypertension', type: 'checkbox' },
+            { name: 'hasDiabetes', label: 'Diabetes', placeholder: 'Have Diabetes?', type: 'checkbox' },
+            { name: 'hasHypertension', label: 'Hypertension', placeholder: 'Have Hypertension?', type: 'checkbox' },
             {
                 name: 'dietaryRestrictions',
                 label: 'Dietary Restrictions',
