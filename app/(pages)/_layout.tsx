@@ -7,11 +7,7 @@ export default function PagesLayout() {
     const router = useRouter();
 
     return (
-        <Stack
-            screenOptions={{
-                headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
-            }}
-        >
+        <Stack>
             <Stack.Screen name='index' options={{ title: 'Welcome', headerShown: false }} />
 
             <Stack.Screen
@@ -23,6 +19,7 @@ export default function PagesLayout() {
                             <ArrowLeft size={24} color='white' />
                         </Pressable>
                     ),
+                    headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
                 }}
             />
 
@@ -35,6 +32,7 @@ export default function PagesLayout() {
                             <ArrowLeft size={24} color='white' />
                         </Pressable>
                     ),
+                    headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
                 }}
             />
             <Stack.Screen name='xion' options={{ title: 'XION EX', headerShown: false }} />

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { ScreenLayout } from '@/components/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,7 +11,7 @@ export default function Home() {
 
     return (
         <ScreenLayout>
-            <Card className='w-fit bg-dark-trans rounded-lg shadow-sm p-6 space-y-4'>
+            <Card className='w-fit bg-dark-trans self-center rounded-lg shadow-sm p-6 gap-4'>
                 <Image source={require('@/assets/images/logo.png')} className='!w-32 !h-32 self-center' />
 
                 <View className='flex-col items-center'>

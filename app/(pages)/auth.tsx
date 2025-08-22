@@ -1,29 +1,15 @@
+import { AuthForm } from '@/components/auth';
 import { ScreenLayout } from '@/components/ScreenLayout';
 import { ActivityIndicator } from '@/components/ui/activity-indicator';
 import { Card } from '@/components/ui/card';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
-import { AuthForm } from '../../components/auth';
 
 export default function Auth() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { push } = useRouter();
-
-    const handleGoogleAuth = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            console.log('Google auth');
-            // await google()
-            push('/auth');
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const router = useRouter();
 
     const handleAuthSubmit = async (data: any) => {
         setIsLoading(true);
@@ -31,7 +17,7 @@ export default function Auth() {
         try {
             console.log('Login data:', data);
             // await login(data.email, data.password)
-            push('/otp');
+            router.push('/otp');
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -55,7 +41,7 @@ export default function Auth() {
                             <ActivityIndicator size='large' color='#60a5fa' />
                         </View>
                     ) : (
-                        <AuthForm onGoogleSignIn={handleGoogleAuth} onSubmit={handleAuthSubmit} isLoading={isLoading} />
+                        <AuthForm onSubmit={handleAuthSubmit} isLoading={isLoading} />
                     )}
                 </View>
             </Card>
