@@ -1,5 +1,6 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { UserProvider } from '@/providers/userProvider';
+import { AbstraxionProvider } from '@burnt-labs/abstraxion-react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -10,7 +11,18 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../assets/styles/global.css';
 
+import { Buffer } from 'buffer';
+global.Buffer = Buffer;
+
 SplashScreen.preventAutoHideAsync();
+
+const treasuryConfig = {
+    treasury: process.env.EXPO_PUBLIC_TREASURY_CONTRACT_ADDRESS,
+    gasPrice: '0.001uxion',
+    rpcUrl: process.env.EXPO_PUBLIC_RPC_ENDPOINT,
+    restUrl: process.env.EXPO_PUBLIC_REST_ENDPOINT,
+    callbackUrl: 'calometer://',
+};
 
 const TransparentDarkTheme = {
     ...DarkTheme,
@@ -47,15 +59,17 @@ export default function RootLayout() {
     }
 
     return (
-        <ThemeProvider value={colorScheme === 'dark' ? TransparentDarkTheme : CustomDefaultTheme}>
-            <UserProvider>
-                <Stack initialRouteName='(pages)'>
-                    <Stack.Screen name='(pages)' options={{ headerShown: false }} />
-                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                    <Stack.Screen name='+not-found' />
-                </Stack>
-                <StatusBar style='auto' />
-            </UserProvider>
-        </ThemeProvider>
+        <AbstraxionProvider config={treasuryConfig}>
+            <ThemeProvider value={colorScheme === 'dark' ? TransparentDarkTheme : CustomDefaultTheme}>
+                <UserProvider>
+                    <Stack initialRouteName='(pages)'>
+                        <Stack.Screen name='(pages)' options={{ headerShown: false }} />
+                        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                        <Stack.Screen name='+not-found' />
+                    </Stack>
+                    <StatusBar style='auto' />
+                </UserProvider>
+            </ThemeProvider>
+        </AbstraxionProvider>
     );
 }
