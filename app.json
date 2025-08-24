@@ -8,11 +8,7 @@
         "scheme": "calometer",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
-        "splash": {
-            "image": "./assets/images/logo.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#000000"
-        },
+
         "ios": {
             "supportsTablet": true,
             "bundleIdentifier": "com.blessingtutka.calometer",
@@ -33,7 +29,6 @@
             "output": "static",
             "favicon": "./assets/images/logo.png"
         },
-        "assetBundlePatterns": ["**/*"],
         "plugins": [
             "expo-router",
             "expo-web-browser",
