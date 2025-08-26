@@ -10,6 +10,20 @@ interface AuthResponse {
     user?: User;
 }
 
+interface OpenFoodFactsResponse {
+    products?: FoodItem[];
+}
+
+interface FoodItem {
+    code: string;
+    product_name?: string;
+    nutriments?: Nutriments;
+}
+
+interface Nutriments {
+    'energy-kcal_100g': number;
+}
+
 interface ErrorResponse {
     status: string;
     error: {
