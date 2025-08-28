@@ -6,7 +6,7 @@ interface User {
 }
 
 interface AuthResponse {
-    accessToken: string;
+    walletID: string;
     user?: User;
 }
 
