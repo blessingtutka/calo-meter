@@ -1,6 +1,7 @@
 import { useAbstraxionAccount, useAbstraxionSigningClient } from '@burnt-labs/abstraxion-react-native';
 // import { ReclaimVerification } from '@reclaimprotocol/inapp-rn-sdk';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -8,6 +9,7 @@ let ReclaimVerification: any = null;
 
 if (Platform.OS === 'ios' || Platform.OS === 'android') {
     // Dynamically require only on native platforms
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     ReclaimVerification = require('@reclaimprotocol/inapp-rn-sdk').ReclaimVerification;
 }
 
@@ -16,7 +18,7 @@ const RUM_CONTRACT_ADDRESS = process.env.EXPO_PUBLIC_RUM_CONTRACT_ADDRESS ?? '';
 const reclaimEnv = {
     appId: process.env.EXPO_PUBLIC_RECLAIM_APP_ID ?? '',
     appSecret: process.env.EXPO_PUBLIC_RECLAIM_APP_SECRET ?? '',
-    providerId: process.env.EXPO_PUBLIC_RECLAIM_PROVIDER_ID ?? 'gmail',
+    providerId: process.env.EXPO_PUBLIC_RECLAIM_PROVIDER_GOOGLE_ID ?? 'gmail',
 };
 
 type Status = 'idle' | 'verifying' | 'verification_complete' | 'executing' | 'complete' | 'error';
@@ -24,6 +26,7 @@ type Status = 'idle' | 'verifying' | 'verification_complete' | 'executing' | 'co
 export default function GoogleAuth() {
     const { client } = useAbstraxionSigningClient();
     const { data: account, isConnected, login, isConnecting } = useAbstraxionAccount();
+    const router = useRouter();
 
     const [queryResult, setQueryResult] = useState<number | undefined>(undefined);
     const [status, setStatus] = useState<Status>('idle');
@@ -130,6 +133,7 @@ export default function GoogleAuth() {
 
             await queryRUMContract();
             Alert.alert('Success', 'Verification completed and on-chain update successful!');
+            router.push('/dashboard');
         } catch (error: any) {
             console.error('Verification error:', error);
             setStatus('error');

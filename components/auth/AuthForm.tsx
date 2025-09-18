@@ -15,7 +15,7 @@ import { AlertCircle, LogIn, Send, UserPlus } from 'lucide-react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import { authSchema, type AuthFormData } from '../../utils/validators';
-// import GoogleAuth from './GoogleAuth';
+import GoogleAuth from './GoogleAuth';
 
 export function AuthForm({ onSubmit, isLoading }: { onSubmit: (data: AuthFormData) => void; isLoading: boolean }) {
     const form = useForm<AuthFormData>({
@@ -84,7 +84,7 @@ export function AuthForm({ onSubmit, isLoading }: { onSubmit: (data: AuthFormDat
                     <Text className='px-2 w-fit bg-black text-center text-sm text-gray-400'>OR CONTINUE WITH</Text>
                 </View>
             </View>
-            {/* <GoogleAuth /> */}
+            <GoogleAuth />
         </View>
     );
 }
