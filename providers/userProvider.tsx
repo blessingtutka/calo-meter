@@ -1,4 +1,5 @@
 // context/UserContext.tsx
+import { XionManager } from '@/utils/xion.namager';
 import { useAbstraxionAccount, useAbstraxionClient, useAbstraxionSigningClient } from '@burnt-labs/abstraxion-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
@@ -17,6 +18,7 @@ interface UserContextType {
     contractAddress: string | null;
     signingClient: any;
     queryClient: any;
+    xionManager: XionManager | null;
     login: (userData: Partial<TUser>) => Promise<void>;
     logout: () => Promise<void>;
     updateProfile: (profileData: Partial<Profile>) => Promise<void>;
@@ -32,7 +34,7 @@ type UserProviderProps = {
 
 export const UserProvider = ({ children }: UserProviderProps) => {
     // Abstraxion hooks
-    const { data: account, isConnected } = useAbstraxionAccount();
+    const { data: account, isConnected, logout: xionLogout } = useAbstraxionAccount();
     const { client: signingClient } = useAbstraxionSigningClient();
     const { client: queryClient } = useAbstraxionClient();
 
@@ -43,6 +45,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [contractAddress, setContractAddress] = useState<string | null>(null);
+    const [xionManager, setXionManager] = useState<XionManager | null>(null);
 
     // Get contract address from environment
     useEffect(() => {
@@ -54,69 +57,51 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         }
     }, []);
 
+    useEffect(() => {
+        if (signingClient && queryClient && account?.bech32Address && contractAddress) {
+            setXionManager(new XionManager(signingClient, queryClient, account.bech32Address, contractAddress));
+        }
+    }, [signingClient, queryClient, account?.bech32Address, contractAddress]);
+
     // Fetch user profile from contract
     const fetchUserProfile = async (address: string): Promise<Profile | null> => {
-        if (!queryClient) {
-            console.log('Query client not initialized');
-            setIsLoading(false);
-            return null;
-        }
-
-        if (!account?.bech32Address) {
-            console.log('Account address not available');
-            setIsLoading(false);
-            return null;
-        }
-
-        if (!contractAddress) {
-            console.log('Contract address not available');
+        if (!xionManager) {
+            console.log('xionManager not initialized');
             setIsLoading(false);
             return null;
         }
 
         try {
-            const response = await queryClient.queryContractSmart(contractAddress, {
-                UserDocuments: {
-                    owner: address,
-                    collection: 'profiles',
-                },
-            });
-
-            if (response?.documents) {
-                const profileDoc = response.documents.find(([id]: [string, any]) => id === address);
+            const result = await xionManager.queryDocuments('profiles', address);
+            if (result.success && result.documents.length > 0) {
+                const profileDoc = result.documents.find(([id]: [string, any]) => id === address);
                 if (profileDoc) {
                     return JSON.parse(profileDoc[1].data);
                 }
             }
         } catch (error) {
             console.error('Error fetching profile from contract:', error);
+        } finally {
+            setIsLoading(false);
         }
+
         return null;
     };
 
-    // Update profile in contract
     const updateContractProfile = async (profileData: Partial<Profile>): Promise<boolean> => {
-        if (!signingClient || !account?.bech32Address || !contractAddress) return false;
+        if (!xionManager || !walletAddress) return false;
 
         try {
             const currentProfile = profile || { displayName: '', email: '', avatar: '' };
             const updatedProfile = { ...currentProfile, ...profileData };
 
-            await signingClient.execute(
-                account.bech32Address,
-                contractAddress,
-                {
-                    Set: {
-                        collection: 'profiles',
-                        document: account.bech32Address,
-                        data: JSON.stringify(updatedProfile),
-                    },
-                },
-                'auto',
-            );
+            const result = await xionManager.updateDocument('profiles', walletAddress, updatedProfile);
 
-            setProfile(updatedProfile);
-            return true;
+            if (result.success) {
+                setProfile(updatedProfile);
+                return true;
+            }
+            return false;
         } catch (error) {
             console.error('Error updating profile in contract:', error);
             return false;
@@ -127,11 +112,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     useEffect(() => {
         const loadUserData = async () => {
             try {
-                const [storedAccessToken, storedUser] = await Promise.all([AsyncStorage.getItem('accessToken'), AsyncStorage.getItem('user')]);
+                const [storedUser] = await Promise.all([AsyncStorage.getItem('user')]);
 
-                if (storedAccessToken && storedUser) {
+                if (storedUser) {
                     const parsedUser = JSON.parse(storedUser);
-                    setUser({ ...parsedUser, accessToken: storedAccessToken });
+                    setUser({ ...parsedUser });
                     setIsLoggedIn(true);
 
                     // If we have a wallet address, try to fetch profile
@@ -202,8 +187,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         setProfile(null);
         setWalletAddress(null);
         setIsLoggedIn(false);
-
-        await AsyncStorage.removeItem('accessToken');
+        await xionLogout();
         await AsyncStorage.removeItem('user');
     };
 
@@ -253,6 +237,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         contractAddress,
         signingClient,
         queryClient,
+        xionManager,
         login,
         logout,
         updateProfile,
