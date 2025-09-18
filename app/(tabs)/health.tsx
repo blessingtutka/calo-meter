@@ -7,65 +7,54 @@ import { HealthFormData } from '@/utils/validators';
 import React, { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 
+const DEFAULT_HEALTH_DATA: HealthFormData = {};
+
 export default function Health() {
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [healthData, setHealthData] = useState<Partial<HealthFormData> | null>(null);
+    const [healthData, setHealthData] = useState<HealthFormData>(DEFAULT_HEALTH_DATA);
 
-    const { walletAddress, contractAddress, signingClient, queryClient, isLoggedIn } = useUser();
+    const { walletAddress, isLoggedIn, xionManager } = useUser();
 
-    // Fetch health data from contract
-    const fetchHealthData = async (): Promise<HealthFormData | null> => {
-        if (!queryClient || !contractAddress || !walletAddress) return null;
+    // Fetch or initialize health data
+    const fetchOrCreateHealthData = async (): Promise<HealthFormData> => {
+        if (!xionManager || !walletAddress) return DEFAULT_HEALTH_DATA;
 
         try {
-            const response = await queryClient.queryContractSmart(contractAddress, {
-                UserDocuments: {
-                    owner: walletAddress,
-                    collection: 'health',
-                },
-            });
-
-            if (response?.documents) {
-                const healthDoc = response.documents.find(([id]: [string, any]) => id === walletAddress);
+            const result = await xionManager.queryDocuments('health', walletAddress);
+            if (result.success && result.documents.length > 0) {
+                const healthDoc = result.documents.find(([id]: [string, any]) => id === walletAddress);
                 if (healthDoc) {
                     return JSON.parse(healthDoc[1].data);
                 }
             }
-        } catch (error) {
-            console.error('Error fetching health data from contract:', error);
+
+            // If no document exists, create a blank one
+            await xionManager.storeDocument('health', walletAddress, DEFAULT_HEALTH_DATA);
+            return DEFAULT_HEALTH_DATA;
+        } catch (err) {
+            console.error('Error fetching health data:', err);
+            throw new Error('Could not fetch health data');
         }
-        return null;
     };
 
-    // Update health data in contract
+    // Update health data
     const updateHealthData = async (data: Partial<HealthFormData>): Promise<boolean> => {
-        if (!signingClient || !walletAddress || !contractAddress) {
+        if (!xionManager || !walletAddress) {
             throw new Error('Not connected to wallet or contract');
         }
 
         try {
-            await signingClient.execute(
-                walletAddress,
-                contractAddress,
-                {
-                    Set: {
-                        collection: 'health',
-                        document: walletAddress,
-                        data: JSON.stringify(data),
-                    },
-                },
-                'auto',
-            );
+            await xionManager.updateDocument('health', walletAddress, data);
             return true;
-        } catch (error) {
-            console.error('Error updating health data in contract:', error);
+        } catch (err) {
+            console.error('Error updating health data:', err);
             throw new Error('Failed to update health data');
         }
     };
 
-    // Load health data on component mount
+    // Load health data when logged in
     useEffect(() => {
         const loadHealthData = async () => {
             if (!isLoggedIn || !walletAddress) {
@@ -74,13 +63,10 @@ export default function Health() {
             }
 
             try {
-                const data = await fetchHealthData();
-                if (data) {
-                    setHealthData(data);
-                }
-            } catch (error) {
-                console.error('Error loading health data:', error);
-                setError('Failed to load health data');
+                const data = await fetchOrCreateHealthData();
+                setHealthData(data);
+            } catch (err: any) {
+                setError(err.message);
             } finally {
                 setIsFetching(false);
             }
@@ -89,7 +75,7 @@ export default function Health() {
         loadHealthData();
     }, [isLoggedIn, walletAddress]);
 
-    const handleSubmit = async (step: number, data: Partial<HealthFormData>) => {
+    const handleSubmit = async (_step: number, data: Partial<HealthFormData>) => {
         if (!isLoggedIn) {
             Alert.alert('Error', 'Please connect your wallet first');
             return;
@@ -102,11 +88,8 @@ export default function Health() {
             const success = await updateHealthData(data);
 
             if (success) {
-                setHealthData(data);
+                setHealthData({ ...healthData, ...data });
                 Alert.alert('Success', 'Health data updated successfully!');
-
-                // Optionally navigate to another screen
-                // push('/dashboard');
             }
         } catch (err: any) {
             setError(err.message);
@@ -128,40 +111,37 @@ export default function Health() {
         );
     }
 
-    if (isFetching) {
-        return (
-            <ScreenLayout>
-                <Card className='w-full p-8 max-w-2xl bg-[#121212] rounded-2xl shadow-lg overflow-hidden'>
-                    <View className='items-center justify-center py-8'>
-                        <ActivityIndicator size='large' color='#60a5fa' />
-                        <Text className='text-gray-400 mt-4'>Loading your health data...</Text>
-                    </View>
-                </Card>
-            </ScreenLayout>
-        );
-    }
-
     return (
         <ScreenLayout>
             <Card className='w-full p-8 max-w-2xl bg-[#121212] rounded-2xl shadow-lg overflow-hidden'>
+                {/* Title */}
                 <View className='flex-col justify-center'>
-                    <Text className={`font-medium text-blue-400 text-3xl`}>{healthData ? 'Update Your Health Profile' : 'Tell us more!'}</Text>
-                    <Text className={`font-medium text-gray-500 text-base`}>
+                    <Text className='font-medium text-blue-400 text-3xl'>{healthData ? 'Update Your Health Profile' : 'Tell us more!'}</Text>
+                    <Text className='font-medium text-gray-500 text-base'>
                         {healthData ? 'Keep your health information up to date' : 'Tell us more to track your health better'}
                     </Text>
                 </View>
 
+                {/* Status messages */}
                 <View className='mt-6'>
-                    {error && <Text className='text-red-400 mb-4 text-sm text-center'>{error}</Text>}
-
-                    {isLoading ? (
-                        <View className='items-center justify-center py-8'>
+                    {isFetching && (
+                        <View className='items-center justify-center py-4'>
                             <ActivityIndicator size='large' color='#60a5fa' />
-                            <Text className='text-gray-400 mt-4'>Saving your health data...</Text>
+                            <Text className='text-gray-400 mt-2'>Loading your health data...</Text>
                         </View>
-                    ) : (
-                        <HealthStepForm onSave={handleSubmit} initialData={healthData || undefined} />
                     )}
+                    {error && <Text className='text-red-400 mb-4 text-sm text-center'>{error}</Text>}
+                    {isLoading && (
+                        <View className='items-center justify-center py-4'>
+                            <ActivityIndicator size='large' color='#60a5fa' />
+                            <Text className='text-gray-400 mt-2'>Saving your health data...</Text>
+                        </View>
+                    )}
+                </View>
+
+                {/* Form always visible */}
+                <View className='mt-6'>
+                    <HealthStepForm onSave={handleSubmit} initialData={healthData || DEFAULT_HEALTH_DATA} />
                 </View>
             </Card>
         </ScreenLayout>

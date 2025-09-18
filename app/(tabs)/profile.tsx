@@ -6,7 +6,7 @@ import { ChevronRight, LogOut } from 'lucide-react-native';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Profile() {
-    const { profile } = useUser();
+    const { profile, logout } = useUser();
 
     const { push } = useRouter();
 
@@ -39,7 +39,7 @@ export default function Profile() {
                     <ChevronRight size={20} color='gray' />
                 </TouchableOpacity>
 
-                <TouchableOpacity className='flex-row justify-between items-center p-4'>
+                <TouchableOpacity onPress={logout} className='flex-row justify-between items-center p-4'>
                     <View className='flex-row gap-2 items-center'>
                         <LogOut size={20} color={'#ef4444'} />
                         <Text className='text-red-500 text-base font-semibold'>Logout</Text>

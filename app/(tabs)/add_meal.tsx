@@ -1,11 +1,12 @@
 import { ScreenLayout } from '@/components/ScreenLayout';
 import { Card } from '@/components/ui/card';
+import { useUser } from '@/providers/userProvider';
 import { getOpenFood } from '@/services/food.service';
 import { Picker } from '@react-native-picker/picker';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Plus, Search } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function FoodSearchScreen() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -13,22 +14,58 @@ export default function FoodSearchScreen() {
     const [grams, setGrams] = useState<Record<string, string>>({});
     const [mealTypes, setMealTypes] = useState<Record<string, string>>({});
 
-    const { mealDate: routeMealDate } = useLocalSearchParams();
-    const mealDate = routeMealDate || new Date().toISOString().split('T')[0];
-    const walletId = '0xUSER_WALLET_ID'; //to change
+    const { date: routeDate, screenId } = useLocalSearchParams();
+    const mealDate = (routeDate as string) || new Date().toISOString().split('T')[0];
+
+    const { walletAddress, xionManager, isLoggedIn } = useUser();
+    const router = useRouter();
 
     const handleSearch = async () => {
         const results = await getOpenFood(searchQuery);
         setFoods(results);
     };
 
-    const handleAddFood = (food: FoodItem) => {
+    const handleAddFood = async (food: FoodItem) => {
+        if (!isLoggedIn || !walletAddress || !xionManager) {
+            Alert.alert('Error', 'Please connect your wallet first');
+            console.log('Please connect your wallet first');
+            return;
+        }
+
         const g = parseFloat(grams[food.code] || '100');
-        if (!g) return;
+        if (!g) {
+            Alert.alert('Error', 'Please enter grams');
+            return;
+        }
+
         const mealType = mealTypes[food.code] || 'Breakfast';
         const calories = ((food.nutriments?.['energy-kcal_100g'] || 0) * g) / 100;
-        console.log(`Added ${g}g ${food.product_name} → ${calories.toFixed(0)} kcal to ${mealType}`);
-        // integrate with meal log here
+
+        const mealEntry = {
+            name: food.product_name || 'Unknown food',
+            type: mealType,
+            grams: g,
+            calories,
+            date: mealDate,
+            createdAt: new Date().toISOString(),
+        };
+
+        try {
+            const result = await xionManager.storeDocument('foodEntry', `${food.code}-${mealDate}`, mealEntry);
+
+            if (result.success) {
+                Alert.alert('Success', `Added ${g}g ${food.product_name} to ${mealType}`);
+                // Navigate back to meal screen and refresh
+                if (screenId === 'meal') {
+                    router.back();
+                }
+            } else {
+                Alert.alert('Error', 'Failed to save meal');
+            }
+        } catch (err) {
+            console.error('Error saving meal:', err);
+            Alert.alert('Error', 'Something went wrong while saving the meal');
+        }
     };
 
     return (
@@ -61,23 +98,27 @@ export default function FoodSearchScreen() {
                             <View className='flex-row items-center mb-2'>
                                 <View className='flex-1'>
                                     <Text className='text-white font-semibold text-base'>{item.product_name}</Text>
-                                    <Text className='text-gray-400 text-sm'>{`${item.nutriments?.['energy-kcal_100g'].toFixed(0)} kcal / 100g`}</Text>
+                                    <Text className='text-gray-400 text-sm'>
+                                        {`${item.nutriments?.['energy-kcal_100g']?.toFixed?.(0) || 0} kcal / 100g`}
+                                    </Text>
                                 </View>
                                 {Platform.OS === 'web' ? (
                                     <Picker
-                                        selectedValue={grams[item.code] || 'Breakfast'}
+                                        selectedValue={mealTypes[item.code] || 'Breakfast'}
                                         onValueChange={(value) => setMealTypes({ ...mealTypes, [item.code]: value })}
-                                        style={{ color: 'white', backgroundColor: '#2a2a2a', borderRadius: 12 }}
+                                        style={{
+                                            color: 'white',
+                                            backgroundColor: '#2a2a2a',
+                                            borderRadius: 12,
+                                        }}
                                         className='me-2 p-1 text-sm'
                                     >
-                                        <Picker.Item label='breakfast' value='Breakfast' />
-                                        <Picker.Item label='lunch' value='Lunch' />
-                                        <Picker.Item label='dinner' value='Dinner' />
-                                        <Picker.Item label='snacks' value='Snacks' />
+                                        <Picker.Item label='Breakfast' value='Breakfast' />
+                                        <Picker.Item label='Lunch' value='Lunch' />
+                                        <Picker.Item label='Dinner' value='Dinner' />
+                                        <Picker.Item label='Snacks' value='Snacks' />
                                     </Picker>
-                                ) : (
-                                    ''
-                                )}
+                                ) : null}
 
                                 <TextInput
                                     value={grams[item.code] || ''}
@@ -100,15 +141,13 @@ export default function FoodSearchScreen() {
                                         style={styles.picker}
                                     >
                                         <Picker.Item style={{ fontSize: 13 }} label='Meal Type' value='' enabled={false} />
-                                        <Picker.Item style={{ fontSize: 13 }} label='breakfast' value='Breakfast' />
-                                        <Picker.Item style={{ fontSize: 13 }} label='lunch' value='Lunch' />
-                                        <Picker.Item style={{ fontSize: 13 }} label='dinner' value='Dinner' />
-                                        <Picker.Item style={{ fontSize: 13 }} label='snacks' value='Snacks' />
+                                        <Picker.Item style={{ fontSize: 13 }} label='Breakfast' value='Breakfast' />
+                                        <Picker.Item style={{ fontSize: 13 }} label='Lunch' value='Lunch' />
+                                        <Picker.Item style={{ fontSize: 13 }} label='Dinner' value='Dinner' />
+                                        <Picker.Item style={{ fontSize: 13 }} label='Snacks' value='Snacks' />
                                     </Picker>
                                 </View>
-                            ) : (
-                                ''
-                            )}
+                            ) : null}
                         </View>
                     )}
                 />

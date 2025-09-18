@@ -102,6 +102,22 @@ export default function TabLayout() {
                     headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
                 }}
             />
+            <Tabs.Screen
+                name='snap_meal'
+                options={{
+                    title: 'Snap Meal',
+                    href: null,
+                    headerShown: true,
+
+                    tabBarStyle: { display: 'flex' },
+                    headerLeft: () => (
+                        <Pressable onPress={() => router.back()} className='px-2'>
+                            <ArrowLeft size={24} color='white' />
+                        </Pressable>
+                    ),
+                    headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
+                }}
+            />
         </Tabs>
     );
 }
