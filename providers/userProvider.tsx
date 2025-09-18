@@ -1,49 +1,272 @@
-import React, { createContext, useState, ReactNode, useEffect } from 'react';
+// context/UserContext.tsx
+import { useAbstraxionAccount, useAbstraxionClient, useAbstraxionSigningClient } from '@burnt-labs/abstraxion-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-type UserContextType = {
+interface TUser {
+    walletAddress: string;
+    profile?: Profile;
+}
+
+interface UserContextType {
     user: TUser | null;
     isLoggedIn: boolean;
-    login: (userData: TUser) => Promise<void>;
+    isLoading: boolean;
+    profile: Profile | null;
+    walletAddress: string | null;
+    contractAddress: string | null;
+    signingClient: any;
+    queryClient: any;
+    login: (userData: Partial<TUser>) => Promise<void>;
     logout: () => Promise<void>;
-};
+    updateProfile: (profileData: Partial<Profile>) => Promise<void>;
+    refreshUserData: () => Promise<void>;
+}
 
-export const UserContext = createContext<UserContextType | null>(null);
+// Create context
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 type UserProviderProps = {
     children: ReactNode;
 };
 
 export const UserProvider = ({ children }: UserProviderProps) => {
+    // Abstraxion hooks
+    const { data: account, isConnected } = useAbstraxionAccount();
+    const { client: signingClient } = useAbstraxionSigningClient();
+    const { client: queryClient } = useAbstraxionClient();
+
+    // State
     const [user, setUser] = useState<TUser | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [profile, setProfile] = useState<Profile | null>(null);
+    const [walletAddress, setWalletAddress] = useState<string | null>(null);
+    const [contractAddress, setContractAddress] = useState<string | null>(null);
 
+    // Get contract address from environment
     useEffect(() => {
-        Promise.all([AsyncStorage.getItem('accessToken'), AsyncStorage.getItem('user')]).then(([storedAccessToken, storedUser]) => {
-            if (storedAccessToken && storedUser) {
-                const parsedUser = JSON.parse(storedUser);
-                setUser({ ...parsedUser, accessToken: storedAccessToken });
-                setIsLoggedIn(true);
-            }
-        });
+        const contractAddr = process.env.EXPO_PUBLIC_DOCUSTORE_CONTRACT_ADDRESS;
+        if (contractAddr) {
+            setContractAddress(contractAddr);
+        } else {
+            console.error('EXPO_PUBLIC_DOCUSTORE_CONTRACT_ADDRESS is not set');
+        }
     }, []);
 
-    const login = async (userData: TUser) => {
-        const { username, accessToken } = userData;
-        setUser(userData);
-        setIsLoggedIn(true);
+    // Fetch user profile from contract
+    const fetchUserProfile = async (address: string): Promise<Profile | null> => {
+        if (!queryClient) {
+            console.log('Query client not initialized');
+            setIsLoading(false);
+            return null;
+        }
 
-        await AsyncStorage.setItem('accessToken', accessToken);
-        await AsyncStorage.setItem('user', JSON.stringify({ username }));
+        if (!account?.bech32Address) {
+            console.log('Account address not available');
+            setIsLoading(false);
+            return null;
+        }
+
+        if (!contractAddress) {
+            console.log('Contract address not available');
+            setIsLoading(false);
+            return null;
+        }
+
+        try {
+            const response = await queryClient.queryContractSmart(contractAddress, {
+                UserDocuments: {
+                    owner: address,
+                    collection: 'profiles',
+                },
+            });
+
+            if (response?.documents) {
+                const profileDoc = response.documents.find(([id]: [string, any]) => id === address);
+                if (profileDoc) {
+                    return JSON.parse(profileDoc[1].data);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching profile from contract:', error);
+        }
+        return null;
     };
 
+    // Update profile in contract
+    const updateContractProfile = async (profileData: Partial<Profile>): Promise<boolean> => {
+        if (!signingClient || !account?.bech32Address || !contractAddress) return false;
+
+        try {
+            const currentProfile = profile || { displayName: '', email: '', avatar: '' };
+            const updatedProfile = { ...currentProfile, ...profileData };
+
+            await signingClient.execute(
+                account.bech32Address,
+                contractAddress,
+                {
+                    Set: {
+                        collection: 'profiles',
+                        document: account.bech32Address,
+                        data: JSON.stringify(updatedProfile),
+                    },
+                },
+                'auto',
+            );
+
+            setProfile(updatedProfile);
+            return true;
+        } catch (error) {
+            console.error('Error updating profile in contract:', error);
+            return false;
+        }
+    };
+
+    // Load user data on app start
+    useEffect(() => {
+        const loadUserData = async () => {
+            try {
+                const [storedAccessToken, storedUser] = await Promise.all([AsyncStorage.getItem('accessToken'), AsyncStorage.getItem('user')]);
+
+                if (storedAccessToken && storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+                    setUser({ ...parsedUser, accessToken: storedAccessToken });
+                    setIsLoggedIn(true);
+
+                    // If we have a wallet address, try to fetch profile
+                    if (parsedUser.walletAddress) {
+                        const userProfile = await fetchUserProfile(parsedUser.walletAddress);
+                        if (userProfile) {
+                            setProfile(userProfile);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadUserData();
+    }, []);
+
+    // Sync with Abstraxion account changes
+    useEffect(() => {
+        if (account?.bech32Address && isConnected) {
+            setWalletAddress(account.bech32Address);
+
+            // If user is logged in but wallet address changed, update it
+            if (isLoggedIn && user?.walletAddress !== account.bech32Address) {
+                setUser((prev) => (prev ? { ...prev, walletAddress: account.bech32Address } : null));
+            }
+        }
+    }, [account?.bech32Address, isConnected, isLoggedIn]);
+
+    // Login function
+    const login = async (userData: Partial<TUser>) => {
+        try {
+            const newUser: TUser = {
+                walletAddress: userData.walletAddress || account?.bech32Address || '',
+                profile: userData.profile,
+            };
+
+            setUser(newUser);
+            setIsLoggedIn(true);
+
+            // Store in AsyncStorage
+            await AsyncStorage.setItem(
+                'user',
+                JSON.stringify({
+                    walletAddress: newUser.walletAddress,
+                }),
+            );
+
+            // Fetch profile from contract if wallet address is available
+            if (newUser.walletAddress) {
+                const userProfile = await fetchUserProfile(newUser.walletAddress);
+                if (userProfile) {
+                    setProfile(userProfile);
+                }
+            }
+        } catch (error) {
+            console.error('Error during login:', error);
+            throw error;
+        }
+    };
+
+    // Logout function
     const logout = async () => {
         setUser(null);
+        setProfile(null);
+        setWalletAddress(null);
         setIsLoggedIn(false);
 
         await AsyncStorage.removeItem('accessToken');
         await AsyncStorage.removeItem('user');
     };
 
-    return <UserContext.Provider value={{ user, isLoggedIn, login, logout }}>{children}</UserContext.Provider>;
+    // Update profile function
+    const updateProfile = async (profileData: Partial<Profile>) => {
+        if (!walletAddress) {
+            throw new Error('No wallet address available');
+        }
+
+        const success = await updateContractProfile(profileData);
+        if (success) {
+            // Update local state
+            setProfile((prev) => ({ ...prev!, ...profileData }));
+
+            // Update user object if it exists
+            if (user) {
+                setUser({
+                    ...user,
+                    profile: { ...user.profile!, ...profileData },
+                });
+            }
+        } else {
+            throw new Error('Failed to update profile');
+        }
+    };
+
+    // Refresh user data
+    const refreshUserData = async () => {
+        if (!walletAddress) return;
+
+        try {
+            const userProfile = await fetchUserProfile(walletAddress);
+            if (userProfile) {
+                setProfile(userProfile);
+            }
+        } catch (error) {
+            console.error('Error refreshing user data:', error);
+        }
+    };
+
+    const contextValue: UserContextType = {
+        user,
+        isLoggedIn,
+        isLoading,
+        profile,
+        walletAddress,
+        contractAddress,
+        signingClient,
+        queryClient,
+        login,
+        logout,
+        updateProfile,
+        refreshUserData,
+    };
+
+    return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
+};
+
+// Custom hook for easier usage
+export const useUser = () => {
+    const context = useContext(UserContext);
+    if (context === undefined) {
+        throw new Error('useUser must be used within a UserProvider');
+    }
+    return context;
 };
