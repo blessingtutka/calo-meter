@@ -38,3 +38,9 @@ interface ApiResponse<T> {
     data: T;
     status_code: number;
 }
+
+type Profile = {
+    displayName: string;
+    email: string;
+    avatar?: string;
+};
