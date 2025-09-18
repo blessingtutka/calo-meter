@@ -86,6 +86,22 @@ export default function TabLayout() {
                     headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
                 }}
             />
+            <Tabs.Screen
+                name='account'
+                options={{
+                    title: 'Account',
+                    href: null,
+                    headerShown: true,
+
+                    tabBarStyle: { display: 'flex' },
+                    headerLeft: () => (
+                        <Pressable onPress={() => router.replace('/profile')} className='px-2'>
+                            <ArrowLeft size={24} color='white' />
+                        </Pressable>
+                    ),
+                    headerBackground: () => <View className='flex-1 bg-black border-b border-b-[#FDB327]' />,
+                }}
+            />
         </Tabs>
     );
 }

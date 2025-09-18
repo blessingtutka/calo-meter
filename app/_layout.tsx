@@ -59,8 +59,8 @@ export default function RootLayout() {
     }
 
     return (
-        <AbstraxionProvider config={treasuryConfig}>
-            <ThemeProvider value={colorScheme === 'dark' ? TransparentDarkTheme : CustomDefaultTheme}>
+        <ThemeProvider value={colorScheme === 'dark' ? TransparentDarkTheme : CustomDefaultTheme}>
+            <AbstraxionProvider config={treasuryConfig}>
                 <UserProvider>
                     <Stack initialRouteName='(pages)'>
                         <Stack.Screen name='(pages)' options={{ headerShown: false }} />
@@ -69,7 +69,7 @@ export default function RootLayout() {
                     </Stack>
                     <StatusBar style='auto' />
                 </UserProvider>
-            </ThemeProvider>
-        </AbstraxionProvider>
+            </AbstraxionProvider>
+        </ThemeProvider>
     );
 }
