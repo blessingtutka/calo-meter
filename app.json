@@ -12,7 +12,9 @@
             "supportsTablet": true,
             "bundleIdentifier": "com.blessingtutka.calometer",
             "infoPlist": {
-                "ITSAppUsesNonExemptEncryption": false
+                "ITSAppUsesNonExemptEncryption": false,
+                "NSCameraUsageDescription": "This app uses the camera to take photos of your meals for food recognition and nutritional analysis.",
+                "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select meal images for analysis."
             }
         },
         "android": {
@@ -21,7 +23,8 @@
                 "backgroundColor": "#000000"
             },
             "edgeToEdgeEnabled": true,
-            "package": "com.blessingtutka.calometer"
+            "package": "com.blessingtutka.calometer",
+            "permissions": ["android.permission.CAMERA", "android.permission.READ_EXTERNAL_STORAGE"]
         },
         "web": {
             "bundler": "metro",
@@ -40,7 +43,19 @@
                     "backgroundColor": "#000000"
                 }
             ],
-            "expo-font"
+            "expo-font",
+            [
+                "expo-camera",
+                {
+                    "cameraPermission": "Allow Meal Snap to access your camera to take photos of your meals."
+                }
+            ],
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "Allow Meal Snap to access your photos to analyze meal images."
+                }
+            ]
         ],
         "experiments": {
             "typedRoutes": true
