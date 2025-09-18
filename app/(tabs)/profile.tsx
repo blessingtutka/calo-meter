@@ -1,11 +1,13 @@
 import { ScreenLayout } from '@/components/ScreenLayout';
 import { Card } from '@/components/ui/card';
+import { useUser } from '@/providers/userProvider';
 import { useRouter } from 'expo-router';
 import { ChevronRight, LogOut } from 'lucide-react-native';
-import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Profile() {
+    const { profile } = useUser();
+
     const { push } = useRouter();
 
     return (
@@ -13,13 +15,16 @@ export default function Profile() {
             {/* Profile Card */}
             <Card className='w-full max-w-2xl p-6 bg-[#121212] rounded-2xl shadow-lg'>
                 <View className='items-center'>
-                    <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} className='w-24 h-24 rounded-full mb-4' />
-                    <Text className='text-white text-xl font-semibold'>John Doe</Text>
-                    <Text className='text-gray-400'>john.doe@email.com</Text>
+                    <Image
+                        source={profile?.avatar ? { uri: profile.avatar } : { uri: 'https://i.pravatar.cc/150?img=12' }}
+                        className='w-24 h-24 rounded-full mb-4'
+                    />
+                    <Text className='text-white text-xl font-semibold'>{profile?.displayName ? profile?.displayName : `John Doe`}</Text>
+                    <Text className='text-gray-400'>{profile?.email ? profile?.email : `john.doe@email.com`}</Text>
                 </View>
 
                 {/* Action Buttons */}
-                <TouchableOpacity className='flex-row justify-between items-center p-4 border-b border-gray-700'>
+                <TouchableOpacity onPress={() => push('/account')} className='flex-row justify-between items-center p-4 border-b border-gray-700'>
                     <Text className='text-white text-base'>Account Settings</Text>
                     <ChevronRight size={20} color='gray' />
                 </TouchableOpacity>
