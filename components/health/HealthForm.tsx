@@ -13,15 +13,16 @@ import { CheckBox, CSelectInput, DateInput, MultiSelectInput } from '../global';
 
 interface HealthStepFormProps {
     onSave: (step: number, data: Partial<HealthFormData>) => Promise<void>;
+    initialData?: Partial<HealthFormData>;
 }
 
-export function HealthStepForm({ onSave }: HealthStepFormProps) {
+export function HealthStepForm({ onSave, initialData }: HealthStepFormProps) {
     const [step, setStep] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
 
     const form = useForm<Partial<HealthFormData>>({
         resolver: zodResolver(healthSchemas[step - 1]),
-        defaultValues: {},
+        defaultValues: { ...initialData },
     });
 
     const onSubmit = async (data: Partial<HealthFormData>) => {
