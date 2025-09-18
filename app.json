@@ -8,7 +8,6 @@
         "scheme": "calometer",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
-
         "ios": {
             "supportsTablet": true,
             "bundleIdentifier": "com.blessingtutka.calometer",
@@ -40,7 +39,8 @@
                     "resizeMode": "contain",
                     "backgroundColor": "#000000"
                 }
-            ]
+            ],
+            "expo-font"
         ],
         "experiments": {
             "typedRoutes": true
@@ -50,6 +50,12 @@
             "eas": {
                 "projectId": "8329f4ae-2255-451b-84f8-4ee53ab98fbd"
             }
+        },
+        "runtimeVersion": {
+            "policy": "appVersion"
+        },
+        "updates": {
+            "url": "https://u.expo.dev/8329f4ae-2255-451b-84f8-4ee53ab98fbd"
         }
     }
 }
