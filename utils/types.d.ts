@@ -17,6 +17,7 @@ interface OpenFoodFactsResponse {
 interface FoodItem {
     code: string;
     product_name?: string;
+    type?: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snacks';
     nutriments?: Nutriments;
 }
 

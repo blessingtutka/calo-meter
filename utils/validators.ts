@@ -19,8 +19,8 @@ export type AuthFormData = z.infer<typeof authSchema>;
 
 export const basicInfoSchema = z
     .object({
-        gender: z.string().min(1, 'Gender is required'),
-        birthDate: z.string().min(1, 'Birth date is required'),
+        gender: z.string().min(1, 'Gender is required').optional(),
+        birthDate: z.string().min(1, 'Birth date is required').optional(),
         height: z.number().min(50, 'Height must be at least 50cm').optional(),
         heightUnit: z.enum(['CM', 'INCH']).optional(),
     })
